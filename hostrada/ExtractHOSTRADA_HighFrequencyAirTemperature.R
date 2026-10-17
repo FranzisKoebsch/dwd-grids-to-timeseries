@@ -55,10 +55,7 @@ for(year in years){
   
 ## iterate over files stored in each subdirectory
   for(file in list.files(file.path(input_dir, year), pattern = "\\.nc$", full.names = TRUE)){
-    
-    # Construct file dir
-    file_dir <- paste(input_dir, year, file, sep="/")      
-      nc_data <- nc_open(file_dir)
+    nc_data <- nc_open(file)
 
     # Create Timestamp
       time <- ncvar_get(nc_data, "time")
@@ -73,14 +70,18 @@ for(year in years){
     cat("Processing ",  format(datetime[1], format = "%b"), format(datetime[1], format = "%Y"), "\n")
 
     # Retrieve met variables by loading netcdf as raster stack
-    r <- rast(file_dir, subds = "tas")
-    # Extract means in the polygon area for every raster layer in stack
-    extracted_means <- terra::extract(r, aoi_v, fun = mean, na.rm = TRUE, exact = TRUE)
-         
+    r <- rast(file, subds = "tas")
+    # Match polygon CRS exactly to the raster CRS (NetCDF CRS lacks an EPSG code,
+    # so 'EPSG:3034' is not recognised as identical, causing a warning in extract())
+    project_aoi <- project(poly_aoi, crs(r)) 
+    # Extract means in the polygon area for every raster layer 
+    extracted_means <- terra::extract(r, project_aoi, fun = mean, na.rm = TRUE, exact = TRUE)
+
+    
     # create/add data.frame
-    if(file == list.files(paste(input_dir, year, sep="/"))[[1]]){
+    if(basename(file) == list.files(paste(input_dir, year, sep="/"))[[1]]){
     hostrada.df <- data.frame(timestamp = datetime, air_temp = as.numeric(extracted_means[1, -1]))}
-    else{hostrada.df <- rbind(hostrada.df, data.frame(timestamp = datetime, air_temp = extracted_val))}
+    else{hostrada.df <- rbind(hostrada.df, data.frame(timestamp = datetime, air_temp = as.numeric(extracted_means[1, -1])))}
     
       } # end of loop for(file in list.files(paste(dir_hos, year, sep="/"))){
 
