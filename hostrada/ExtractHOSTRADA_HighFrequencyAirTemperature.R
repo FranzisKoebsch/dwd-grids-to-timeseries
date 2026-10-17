@@ -30,7 +30,7 @@ library(ncdf4)
 input_dir <- 'path/to/downloaded/hostrada/temperature/data'
 
 # Define spatial extent through a polygon mask from the study area
-aoi_file <- unzip('path/to/aoi.kmz', exdir = tempdir()) 
+aoi_file <- unzip('path/to/Example_aoifile.kmz', exdir = tempdir()) 
 
 # Define output dir 
 output_dir <- 'path/to/extracted/temperature/data'
