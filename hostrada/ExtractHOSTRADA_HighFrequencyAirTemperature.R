@@ -9,7 +9,7 @@
 ## 2. Data Characteristics
 # Temporal Resolution: 60-minutes
 # Spatial Resolution: 1 km x 1 km grid covering German
-# Units: °C
+# Units: Â°C
 # Projection: EPSG:3034 (ETRS89 / LCC Europe) 
   
 ## 3. Processing:
