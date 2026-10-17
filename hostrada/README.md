@@ -1,6 +1,6 @@
 # HOSTRADA – Hourly Time Series from DWD Grids
 
-R scripts to download hourly gridded meteorological data (HOSTRADA) from the German Weather Service (DWD) and extract spatially averaged time series for user-defined study areas.
+R scripts to download hourly gridded meteorological data (HOSTRADA) from the German Weather Service (DWD) and extract spatially averaged time series for user-defined study areas. Scripts are currently available for Air Temperature and Global Radiation.
 
 ## About the dataset
 
@@ -33,10 +33,7 @@ HOSTRADA (High-resolution grids of hourly variables for Germany) is provided by 
 | Wind speed | m/s | 10 m |
 | Wind direction | ° | 10 m |
  
- 
-## Scripts
- 
-This folder currently covers **air temperature** and **global radiation**.
+Available scripts currently cover **air temperature** and **global radiation**.
  
 ### 1. Download
  
@@ -45,7 +42,7 @@ This folder currently covers **air temperature** and **global radiation**.
 | `DownloadHOSTRADA_HighFrequencyAirTemperature.R` | Air temperature | [air_temperature_mean](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/hostrada/air_temperature_mean/) |
 | `DownloadHOSTRADA_HighFrequencyRadiation.R` | Global radiation | [radiation_downwelling](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/hostrada/radiation_downwelling/) |
  
-The scripts download the monthly NetCDF files starting from **2009**. Files follow the DWD naming scheme, e.g. `tas_1hr_HOSTRADA-v1-0_BE_gn_1995010100-1995013123.nc`.
+The scripts download the monthly NetCDF files for a user-defined period (start and endy year), and have been tested for the years 2009-2026. Downloaded files follow the DWD naming scheme, e.g. `tas_1hr_HOSTRADA-v1-0_BE_gn_1995010100-1995013123.nc`. 
  
 ### 2. Time series extraction
  
@@ -54,23 +51,12 @@ The scripts download the monthly NetCDF files starting from **2009**. Files foll
 | `ExtractHOSTRADA_HighFrequencyAirTemperature_Huetelmoor.R` | Air temperature |
 | `ExtractHOSTRADA_HighFrequencyRadiation_Huetelmoor.R` | Global radiation |
  
-The scripts use the Hütelmoor peatland (NE Germany) as an example study area and can be adapted to any other area by replacing the polygon file.
- 
 **Input**
- - Downloaded NetCDF files for the respective variable
-- A `.kmz` file with the study area polygon(s), e.g. created in Google Earth (example: `HuetelmoorExtent.kmz`)
+ - Downloaded NetCDF files for the respective variable, organized in annual folders
+- A `.kmz` file with the study area polygon(s), e.g. created in Google Earth. An example AOI polygon file (Example_AOIFile.kmz) is provided for testing. The polygon covers part of the Hütelmoor peatland (NE Germany).
   
-**Procedure**
-1. Raster data are loaded with `raster::stack()`.
-2. Values are spatially averaged over all grid cells within each study area polygon.
-3. Timestamps are read with `ncdf4::ncvar_get(nc_data, "time")`; the time unit is taken from `ncdf4::ncatt_get(nc_data, "time", "units")$value`.
-   
 **Output**
  Hourly time series of the meteorological variable, spatially averaged per study area polygon (timestamps in UTC).
- 
-## Requirements
-- R
-- Packages: `raster`, `ncdf4`
   
 ## Data source and license
  
