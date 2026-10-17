@@ -1,5 +1,5 @@
 #################################################################################
-# Download HOSTRADA (Hochaufgelöster stündlicher Rasterdatensatz)  hourly radiation data from DWD.
+# Download HOSTRADA (HochaufgelÃ¶ster stÃ¼ndlicher Rasterdatensatz)  hourly radiation data from DWD.
 # HOSTRADA is available since 2004 and continuously updated at the end of the following month.
 # HOSTRADA products are interpolated from station data using climate models and satellite data.
 # Temporal resolution: 60 min, spatial resolution: 1 km, projection: EPSG:3034 (ETRS89 / LCC Europe), timezone: UTC.
