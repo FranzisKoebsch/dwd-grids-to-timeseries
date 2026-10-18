@@ -24,7 +24,6 @@ library(sf)
 library(terra)
 library(ncdf4)
 
-
 #################################################################################
 # User configurations
 
@@ -56,11 +55,6 @@ for(year in years){
   ## iterate over files stored in each subdirectory
   for(file in list.files(file.path(input_dir, year), pattern = "\\.nc$", full.names = TRUE)){
     
-      #tryCatch( # some files files cannot be read, catch and handle the error
-      #{ 
-      # disable trCatch(): after solving the download issue no further errors due to incomplete download should occur.
-      # remaining file integrity issues need to be identified
-    
       # Retrieve time information from the hdf file
       nc_data <- nc_open(file)
       time <- ncvar_get(nc_data, "time")
@@ -82,24 +76,8 @@ for(year in years){
     # so 'EPSG:3034' is not recognised as identical, causing a warning in extract())
     project_aoi <- project(poly_aoi, crs(r)) 
     # Extract means in the polygon area for every raster layer 
-    extracted_means <- terra::extract(r, project_aoi, fun = mean, na.rm = TRUE, exact = TRUE)
-     # }, # end of first tryCatch() part
-    
-    # second part of tryCatch() part: in case an error occurs
-       # error = function(e) {
-          # error message
-        #  print(paste("Fehler beim Einlesen von", file, ":", e$message))
-          # alternative way to retrieve time information from file name
-          # extract start and end date
-        #  start_date <- as.POSIXct(substr(file, 66, 75), format = "%Y%m%d%H", tz="GMT")
-         # end_date <- as.POSIXct(substr(file, 77, 86), format = "%Y%m%d%H", tz="GMT")
-          # Create a sequence of hourly timestamps from start to end
-          #datetime <- seq(start_date, end_date, by = "hour")
-          # for missing met variable: create a vector of NAs with the same length as datetime
-          #extracted_val <- rep(NA, length(datetime))
-          
-    #}) # end of tryCatch() 
-     
+    extracted_means <- terra::extract(r, project_aoi, fun = mean, na.rm = TRUE, exact = TRUE)   
+
      # create/add data.frame
       if(basename(file) == list.files(paste(input_dir, year, sep="/"))[[1]]){
       hostrada.df <- data.frame(timestamp = datetime, glob_rad = as.numeric(extracted_means[1, -1]))}
