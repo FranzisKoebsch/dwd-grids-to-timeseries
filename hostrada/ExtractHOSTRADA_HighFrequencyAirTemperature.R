@@ -54,14 +54,17 @@ for(year in years){
     
 ## iterate over files stored in each subdirectory
   for(file in list.files(file.path(input_dir, year), pattern = "\\.nc$", full.names = TRUE)){
-    # Create Timestamp
+    
+     # Retrieve time information from the hdf file
       nc_data <- nc_open(file)
       time <- ncvar_get(nc_data, "time")
-      # convert time information to common POSIXct timestamp
+      # Convert time information to common POSIXct timestamp
       time_units <- ncatt_get(nc_data, "time", "units")$value
-      time_origin <- strsplit(time_units, "days since ")[[1]][2]
-      time_origin <- as.POSIXct(time_origin, format= "%Y-%m-%dT%H:%M:%S", tz= "GMT")
-      datetime <- as.POSIXct(time* 24 * 60 * 60 + time_origin)
+      time_origin <- sub(".*since ", "", time_units)
+      time_origin <- as.POSIXct(time_origin, tz= "GMT")
+     # Accounts for inconsistent timestamp reference in DWD HOSTRADA (switching between 'days since' and 'hours since', e.g., in January 2024)
+      if(sub(" .*", "", time_units) == "hours"){datetime <- as.POSIXct(time* 60 * 60 + time_origin)}
+      if(sub(" .*", "", time_units) == "days"){datetime <- as.POSIXct(time* 60 * 60 * 24 + time_origin)}
       nc_close(nc_data)
       
     # Status message
