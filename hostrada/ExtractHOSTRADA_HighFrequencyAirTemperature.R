@@ -13,7 +13,8 @@
 # Projection: EPSG:3034 (ETRS89 / LCC Europe) 
   
 ## 3. Processing:
-# This script extracts hourly temperatur time series for defined study areas from the downloaded HOSTRADA grids, assuming the data to be organized in folders of annual slices.
+# This script extracts hourly temperature time series for defined study areas from the downloaded HOSTRADA grids.
+# Input files are expected in one subfolder per year, named by the year, (e.g. input_dir/2009/, input_dir/2010/, ...), as created by the download script.
 # Study area polygons are defined in a kmz polygon files (can be created in GoogleEarth).
 # The script calculates the  air temperature averaged over all grid cells in each study area polygon for each hourly time step.
 #################################################################################
@@ -48,16 +49,13 @@ poly_aoi <- st_zm(poly_aoi, what = "ZM")
 # convert to terra object
 poly_aoi <- vect(poly_aoi)  
 
-# Iterate over years represented by subdirectories
-#for(year in list.files(input_dir)){
+# Iterate over the selected years. Input files are expected in one subfolder per year, named by the year
 for(year in years){ 
     
-  
 ## iterate over files stored in each subdirectory
   for(file in list.files(file.path(input_dir, year), pattern = "\\.nc$", full.names = TRUE)){
-    nc_data <- nc_open(file)
-
     # Create Timestamp
+      nc_data <- nc_open(file)
       time <- ncvar_get(nc_data, "time")
       # convert time information to common POSIXct timestamp
       time_units <- ncatt_get(nc_data, "time", "units")$value
@@ -90,4 +88,4 @@ for(year in years){
   output_filename <- paste("HOSTRADA_HourlyAirTemp_", year, ".csv", sep="")
   write.csv(hostrada.df, paste(output_dir, output_filename, sep="/") , row.names = F)
 
-} # end of loop for(year in list.files(input_dir)){
+} # end of loop for(file in list.files(file.path(input_dir, year), pattern = "\\.nc$", full.names = TRUE)){
