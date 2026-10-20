@@ -1,0 +1,78 @@
+#################################################################################
+# Download of Recent Hourly RADOLAN Precipitation Grids (RW Product) from DWD
+# Data Source: RADOLAN (Radar-Online-Aneichung)
+# Downloaded from: https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin/
+# "recent" covers the current and the previous year; older data are in .../radolan/historical/bin/
+# Product description: https://www.dwd.de/DE/leistungen/radolan/radolan.html
+
+# Product: RW – hourly precipitation sums from radar data, adjusted to rain gauge observations
+# Temporal resolution: 60 min; since 2023 the hourly sums are updated in 10-min intervals
+# Spatial resolution: 1 km x 1 km grid covering Germany
+# Time zone: UTC
+# Units: 1/10 mm (raw values) -> divide by 10 to obtain mm (done in the ExtractRADOLAN script)
+# Projection: polar stereographic (central meridian 10.0° E, standard parallel 60.0° N)
+# Binary files contain no georeference (no CRS, extent 0-900 cells)
+# Georeferencing  will be done in the downstream ExtractRADOLAN script
+# Note: RADOLAN products with higher temporal resolution (5, 10 min) exist,
+#       but are only quasi-calibrated and therefore of lower quality.
+
+# RADOLAN RW product provides high-quality precipitation data adjusted to station data
+# Temporal resolution: 60 min, updated in 10 min intervals (since 2023), spatial resolution: 1 km, timezone: UTC.
+# Projection: EPSG-Code 31467 (DHDN / 3-degree Gauss-Kruger zone 4 projection based on Bessel 1841 Ellipsoid)
+# higher temporal resolution of RADOLAN data  (5, 10 min) available, though with lower quality (quasi-calibrated)
+# Precipitation is provided as hourly sums in 1/10mm -> requires division with 10 (done in the downstream ExtractRADOLAN script)
+# for a detailed description, see: https://www.dwd.de/DE/leistungen/radolan/radolan.html
+
+# The script downloads the RW files for a user-defined period (start and end date).
+# From the 10-min updates, only the hourly sums ending at minute 50 are kept
+# (standard RW timestamp, available for previous years < 2023).
+#################################################################################
+# Packages required
+library("rdwd")
+
+# Define start and end of data acquisition period (should cover the same year)
+start_date <- as.Date("2025-01-30") 
+end_date <- as.Date("2025-12-31") 
+year <- format(as.POSIXct(start_date), format="%Y") # extract year to store data in annual slices
+
+# Set directory to save RADOLAN data 
+dir_rad <- paste('D:/DWD_Grids/RADOLAN/untarred', year,sep="/")
+
+# Download file index
+# Build link to the DWD's FTP server
+base <- gridbase 
+link <- "hourly/radolan/recent/bin" 
+# Load indices for available RADOLAN data
+index <- indexFTP(link, base = base) 
+
+# Extract timestamps from file names
+timestamps <- as.POSIXct(str_extract(index, "(?<=raa01-rw_10000-)\\d{10}"),
+                         format = "%y%m%d%H%M", tz = "UTC")
+
+# Set filter for start and end date, 
+# and select only the hourly sums ending at minute 50
+keep <- !is.na(timestamps) &
+  as.Date(timestamps) >= start_date &
+  as.Date(timestamps) <= end_date &
+  format(timestamps, "%M") =="50"
+
+index_filtered <- index[keep]
+
+# Warning if no data were found for the selected period
+if (length(index_filtered) == 0)
+  stop("No files found for this period. For data older than last year, 
+       use the historical download script.")
+
+# Download filtered files 
+files <- dataDWD(
+  url = index_filtered, 
+  base = base, 
+  joinbf = TRUE, 
+  dir = dir_rad, 
+  read = FALSE
+)
+
+# Warning in case of failed downloads 
+missing <- files[!file.exists(files)]
+if (length(missing) > 0)
+  message(length(missing), " files missing - rerun the script to retry (existing files are skipped).")
