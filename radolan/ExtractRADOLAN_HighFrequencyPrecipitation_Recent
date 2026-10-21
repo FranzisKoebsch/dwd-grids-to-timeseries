@@ -1,0 +1,116 @@
+#################################################################################
+# Extraction of Hourly Precipitation Time Series for Specified Study Areas from RADOLAN RW Grids
+##1. Data Source: RADOLAN RW grids 
+# Downloaded from: https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin/
+# Product description: https://www.dwd.de/DE/leistungen/radolan/produktuebersicht/radolan_produktuebersicht_pdf.pdf?__blob=publicationFile&v=12
+# Data were downloaded from FTP server of the DWD using the script DownloadRadolan_HighFrequencyPrecipitation.R`
+  
+## 2. Data Characteristics
+# Temporal Resolution: 60-minute accumulation periods, updated every 10 minutes.
+# Spatial Resolution: 1 km x 1 km grid covering Germany.
+# Units: Original precipitation unit is 1/10 mm. 
+  
+## 3. Processing:
+# This script extracts hourly precipitation time series for defined study areas from the downloaded RADOLAN RW grids.
+# Input files are zipped in .gz format, readDWD() unpacks and stores the unzipped files in the same folder
+# to avoid any confusion with file names and to safe storage space, the unzipped files are removed right after creatio
+# Study area polygons are defined in a shapefile .
+# The script calculates the  precipitation averaged over all grid cells in each study area polygon for each hourly time step.
+#################################################################################
+
+# Packages required
+library("stringr") 
+library("sf")
+library("terra")
+library("rdwd")
+library("R.utils")
+library("dwdradar")
+
+#suppress rdwd progress messages
+options(rdwdquiet=TRUE)
+
+#################################################################################
+# User configurations
+
+# Define the year for the RADOLAN data extraction
+year <- 2025
+
+# Directory to read RADOLAN data 
+# Expects data to be stored in annual subdirectories
+input_dir <- paste('Input/Path/To/Downloaded/RADOLAN/Data', year, sep="/")
+
+# Define spatial extent through a polygon mask from the study area
+poly <- unzip("File/Path/To/Polygonmask.kmz") 
+polygon <- st_read(poly) 
+polygon <- st_transform(polygon, crs = '+proj=longlat +datum=WGS84 +no_defs')
+
+# Define output path and filename
+# Data are stored in annual subdiectories, created by the script
+output_dir <- paste0("Output/Path/To/Extracted/RADOLAN/Data_", year, ".csv")
+
+#################################################################################
+# Remove unzipped files from the input directory, which may disturb the script
+# Previous, incomplete runs might have created unzipped files (non-.gz files) in the input directory,
+# which were not removed by the unlink() function below
+# Code identifies unzipped files in the input directory and removes them after confirmation by the user 
+all_files <- list.files(input_dir)
+unzipped  <-  all_files[!grepl("\\.gz$", all_files)]
+
+if (length(unzipped) > 0) {
+  cat("The following", length(unzipped), "unzipped file(s) were found and may disturb the following run:\n")
+  print(unzipped)
+  
+  answer <- askYesNo("Delete these files?")
+  
+  if (isTRUE(answer)) {
+    file.remove(file.path(input_dir, unzipped))
+    cat("Files deleted.\n")
+  } else {
+    cat("No files deleted.\n")
+  }
+}
+
+#Define Progress bar
+pb <- winProgressBar(title="Progress", min = 0, max = length(list.files(input_dir)), width = 300) 
+i=1
+
+#################################################################################
+# Start Data extraction
+# Iterate over downloaded data, indexed for the full hour
+for (file in list.files(input_dir)) {
+  radolan_data <- readDWD(paste(input_dir,"/", file, sep=""), toraster = T, type="radar", tz = "GMT")  # unzip and read RADOLAN data
+  
+  # Remove unpacked data file to reduce storage space and to avoid any confusion with double file names
+  remove_file <- substr(file, 1, nchar(file) - 3)
+  unlink(paste(input_dir,"/", remove_file, sep=""))
+  
+  # Timestamp extraction 
+  timestamp <- radolan_data$meta$date 
+
+  # Assign RADOLAN projection
+  radolan_data <- projectRasterDWD(radolan_data$dat, targetproj = NULL)
+
+  # Coordinate transformation of the AOI (just once)
+  if(file == list.files(input_dir)[1]){
+  polygon <- project(vect(polygon), crs(radolan_data))}
+  
+  # Area-weighted precipitation of the polygon area
+  poly_prec <- terra::extract(radolan_data, polygon, fun = mean, na.rm = TRUE, exact = TRUE)
+
+ # Save precipitation results in data.frame
+  # Multiply precipitation with scale_factor 10 for unit conversion from 1/10mm to mm
+  if(file == list.files(input_dir)[1]){
+  radolan.df <- data.frame(timestamp=timestamp, 
+                           precip = round(poly_prec[1,2] * 10, 2))}
+  else{radolan.df <- rbind(radolan.df, data.frame(timestamp=timestamp, 
+                          precip = round(poly_prec[1,2] * 10, 2)))}
+
+  # Progress bar
+  setWinProgressBar(pb, i, title = paste(round(i/length(list.files(input_dir))*100, 0), "% ready"))
+  i <- i+1
+}
+
+close(pb)
+
+# Save data
+write.csv(radolan.df, output_filename, row.names = F)
