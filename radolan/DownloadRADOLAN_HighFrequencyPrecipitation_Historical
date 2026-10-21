@@ -36,7 +36,7 @@ start_year <- 2023
 end_year <- 2024
 
 # Define output directory, downloaded precipitation data will be arranged in annual subfolders created by the script
-output_dir <- 'E:/DWD_Grids/RADOLAN/untarred'
+output_dir <- 'Path/To/Store/Downloaded/RADOLAN/Output'
 
 # Download file index
 # Build link to the DWD's FTP server
