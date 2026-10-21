@@ -29,14 +29,16 @@
 #################################################################################
 # Packages required
 library("rdwd")
+library("stringr")
+
 
 # Define start and end of data acquisition period (should cover the same year)
-start_date <- as.Date("2025-01-30") 
-end_date <- as.Date("2025-12-31") 
+start_date <- as.Date("2026-01-01") 
+end_date <- as.Date("2026-10-20") 
 year <- format(as.POSIXct(start_date), format="%Y") # extract year to store data in annual slices
 
 # Set directory to save RADOLAN data 
-dir_rad <- paste('D:/DWD_Grids/RADOLAN/untarred', year,sep="/")
+output_dir <- paste('Path/To/Store/Downloaded/RADOLAN/Output', year,sep="/")
 
 # Download file index
 # Build link to the DWD's FTP server
@@ -68,7 +70,7 @@ files <- dataDWD(
   url = index_filtered, 
   base = base, 
   joinbf = TRUE, 
-  dir = dir_rad, 
+  dir = output_dir, 
   read = FALSE
 )
 
