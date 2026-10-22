@@ -26,6 +26,10 @@
 # for a detailed description, see: https://www.dwd.de/DE/leistungen/radolan/radolan.html
 
 # The script downloads the RW files as monthly .tar.gz archives for a user-defined period (start and end year).
+# Historical RADOLAN data are bundled in monthly archives
+# (.tar or .tar.gz, partly nested), which must be unpacked in a separate step.
+# Downloaded RADOLAN data are therefore stored in the subfolder 'tarred'
+# and will be unpacked by UntarRADOLAN_HighFrequencyPrecipitation.R.
 #################################################################################
 # Packages required
 library("rdwd")
@@ -47,23 +51,25 @@ index <- indexFTP(link, base = base)
 
 # for-loop to iterate through the years
 for (year in c(start_year: end_year)){
-  
-  # Create directory to save annual slices of RADOLAN precipitation data 
-  output_dir_annual <- paste(output_dir, year,sep="/")
+
+  # Create directory to save the downloaded RADOLAN data in annual folders.
+  # Downloaded RADOLAN data are stored in the subfolder 'tarred'
+  # and will be unpacked by UntarRADOLAN_HighFrequencyPrecipitation.R.
+  output_dir_annual <- paste(output_dir, "tarred", year, sep="/")
   if(!dir.exists(output_dir_annual)){
-  dir.create(output_dir_annual)} # create directories for annual data packages
+    dir.create(output_dir_annual, recursive = T)} # create directories for annual data packages
   
   # Extract years from file names
   years_files <- as.numeric(str_extract(index, "(?<=RW)\\d{4}"))
   index_filtered <- index[years_files == year]
   index_filtered <- index_filtered[!is.na(index_filtered)]
-
-files <- dataDWD(
-  url = index_filtered, 
-  base = base, 
-  joinbf = TRUE, 
-  dir = output_dir_annual, 
-  read = FALSE
+  
+  files <- dataDWD(
+    url = index_filtered, 
+    base = base, 
+    joinbf = TRUE, 
+    dir = output_dir_annual, 
+    read = FALSE
   )
 } #end of for-loop to iterate through the years
 
