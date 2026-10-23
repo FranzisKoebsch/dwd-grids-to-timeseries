@@ -2,3 +2,16 @@
 Download DWD grids and extract time series of meteo data
 
 This repository provides a documented, ready-to-use R workflow for obtaining hourly time series of meteorological variables from the DWD grid products RADOLAN and HOSTRADA - from downloading the gridded products to the extraction of a consistent (long-term) time series for a user-defined study area. It builds on the R package rdwd and adresses several pitfalls in handling these data (see known pitfalls). 
+
+If you use these scripts for your work, please cite them as below:
+cff-version: 1.2.0
+title: "dwd-grids-to-timeseries: R workflow for hourly time series from DWD gridded products (HOSTRADA, RADOLAN)"
+authors:
+  - family-names: "Koebsch"
+    given-names: "Franziska"
+    orcid: "https://orcid.org/0000-0003-1045-7680"
+    affiliation: "University of Greifswald"
+version: 1.0.0
+date-released: 2026-10-23
+repository-code: "https://github.com/FranzisKoebsch/dwd-grids-to-timeseries"
+license: MIT
