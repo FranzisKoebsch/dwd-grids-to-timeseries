@@ -1,7 +1,8 @@
 #################################################################################
-# Unpacking of Historical RADOLAN RW Archives into Individually Gzipped Hourly Files
+# Unpacking of historical RADOLAN RW Archives into Individually gzipped Hourly Files (.gz)
 # This step is required between download and time series extraction
-# to provide consistent input data for all years.
+# to provide consistent input data for all years (historical and recent data product).
+# Not required for recent RADOLAN RW Archives
 
 ## 1. Input
 # Monthly RADOLAN archives downloaded from the historical DWD archive
@@ -10,21 +11,21 @@
 
 ## 2. Background
 # rdwd::readDWD() is intended to handle .tar.gz archives directly. In practice, however,
-# only individually gzipped hourly files (.gz) could be read reliably; neither the
-# archives nor uncompressed binary files worked. This script therefore converts all
-# downloaded historical RADOLAN data into consistent .gz files, 
-# matching the format of the recent data.
+# only individually unpacked gzipped hourly files (.gz) could be read reliably. 
+# This script therefore converts all tarred data downloaded from the historical 
+# RADOLAN product into consistent .gz files, thereby matching the format of the recent data.
 # Script has been tested for the historical RADOLAN RW product 2009-2024
 
 ## 3. Archive structure on the DWD server and processing (2009-2024)
 # 06/2009 - 06/2014: .tar.gz monthly archives containing gzipped hourly files
-#                    -> untarred, files are kept as .gz
+#                    -> script untars, unpacked files are kept as .gz
 # 07/2014 - 2022:    .tar monthly archives containing uncompressed hourly files
-#                    -> untarred, files are gzipped (also saves storage space)
-# 2023-2024          -> untarred twice, files are gzipped
+#                    -> script untars and compresses  unpacked files to .gz (also saves storage space)
+# 2023-2024:          nested archives (monthly .tar archives containing daily .tar.gz archives)
+#                    -> script untars twice, unpacked files are kept as .gz
 
 ## 4. Note
-# The original archives are not deleted by this script. Remove them manually
+# The original tar archives are not deleted by this script. Remove them manually
 # after checking that all hourly files have been extracted.
 #################################################################################
 
@@ -35,10 +36,10 @@ library("R.utils")
 # User configurations
 
 # Directory to read tar.gz RADOLAN data 
-input_dir <- 'E:/DWD_Grids/RADOLAN/tarred'
+input_dir <- 'Path/To/Downloaded/Historical/Radolan/Data'
 
 # Directory to store untarred gz files 
-output_dir <- 'E:/DWD_Grids/RADOLAN/untarred'
+output_dir <- 'Path/To/Store/Untarred/RADOLAN/Output'
 
 #################################################################################
 # Start Data extraction
@@ -55,7 +56,7 @@ for(year in list.files(input_dir)){
     #create subdirectory for each year in dir_gz output folder
     if(folder==list.files(paste(input_dir, year, sep="/"))[[1]]){
       dir.create(full_output_dir)}
-
+    
     # untar
     untar(full_input_dir, exdir = full_output_dir)
     
