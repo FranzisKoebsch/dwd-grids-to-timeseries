@@ -16,13 +16,6 @@
 # Note: RADOLAN products with higher temporal resolution (5, 10 min) exist,
 #       but are only quasi-calibrated and therefore of lower quality.
 
-# RADOLAN RW product provides high-quality precipitation data adjusted to station data
-# Temporal resolution: 60 min, updated in 10 min intervals (since 2023), spatial resolution: 1 km, timezone: UTC.
-# Projection: EPSG-Code 31467 (DHDN / 3-degree Gauss-Kruger zone 4 projection based on Bessel 1841 Ellipsoid)
-# higher temporal resolution of RADOLAN data  (5, 10 min) available, though with lower quality (quasi-calibrated)
-# Precipitation is provided as hourly sums in 1/10mm -> requires division with 10 (done in the downstream ExtractRADOLAN script)
-# for a detailed description, see: https://www.dwd.de/DE/leistungen/radolan/radolan.html
-
 # The script downloads the RW files for a user-defined period (start and end date).
 # From the 10-min updates, only the hourly sums ending at minute 50 are kept
 # (standard RW timestamp, available for previous years < 2023).
