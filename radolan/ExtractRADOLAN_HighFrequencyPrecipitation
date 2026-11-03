@@ -83,7 +83,7 @@ for(year in start_year : end_year){
   for(file in selected_files){
 
   # read raster file  
-  radolan_data <- readDWD(paste(input_dir, year, file,sep="/"), toraster = T, type="radar", tz = "GMT")  # unzip and read RADOLAN data
+  radolan_data <- readDWD(file, toraster = T, type="radar", tz = "GMT")  # unzip and read RADOLAN data
 
   #remove unpacked data file to reduce storage space and to avoid any confusion with double file names
   remove_file <- substr(file, 1, nchar(file) - 3)
