@@ -1,0 +1,124 @@
+#################################################################################
+# Extraction of Hourly Precipitation Time Series for Specified Study Areas from RADOLAN RW Grids
+
+## 1. Data Source: RADOLAN RW grids
+# Recent data products covering the current and the previous year:
+# Gzipped hourly files (.gz) downloaded with the script 'DownloadRadolan_HighFrequencyPrecipitation_RecentData.R`
+# Source: https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin/
+# Historical data products: hourly files, partly tarred and partly gzipped, downloaded with the script 'DownloadRadolan_HighFrequencyPrecipitation_HistoricalData.R`
+# Source: https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/historical/bin/
+# Heterogeneous format of historical data is harmonized with the script UntarRADOLAN_HighFrequencyPrecipitation.R to consistent unpacked gzipped files
+# Product description: https://www.dwd.de/DE/leistungen/radolan/produktuebersicht/radolan_produktuebersicht_pdf.pdf?__blob=publicationFile&v=12
+
+## 2. Data Characteristics
+# Product: RW – hourly precipitation sums from radar data, adjusted to rain gauge observations
+# Temporal resolution: 60 min; since 2023 the hourly sums are updated in 10-min intervals
+# Spatial resolution: 1 km x 1 km grid covering Germany
+# Time zone: UTC
+# Units: 1/10 mm (raw values) -> divide by 10 to obtain mm (done in the ExtractRADOLAN script)
+# Projection: polar stereographic (central meridian 10.0° E, standard parallel 60.0° N)
+# Binary files contain no georeference (no CRS, extent 0-900 cells)
+
+## 3. Processing:
+# This script extracts hourly precipitation time series for defined study areas from downloaded RADOLAN RW grids.
+# Input files are expected in one subfolder per year, named by the year, (e.g. input_dir/2009/, input_dir/2010/, ...), 
+# as created by the download/untar script.
+# Input files are zipped in .gz format, readDWD() unpacks and stores the unzipped files in the same folder.
+# The unzipped files are removed right after creation
+# to avoid any confusion with file names and to save storage space.
+# Study area polygons are defined in a kmz polygon file (can be created in GoogleEarth).
+# The script calculates an area-weighted mean over all grid cells overlapping the study area polygon.
+# Since 2023 the DWD provides hourly precipitation sums every 10 minutes.
+# The script extracts only the hourly sums ending at minute 50 (hh:50), which avoids
+# overlapping time windows and ensures consistency with the data prior to 2023.
+#################################################################################
+
+# Packages required
+library("sf")
+library("terra")
+library("rdwd")
+#suppress rdwd progress messages
+options(rdwdquiet=TRUE)
+#################################################################################
+# User configurations
+
+# Define the start and end year
+start_year <- 2023
+end_year <- 2024
+
+# Directory to read RADOLAN data 
+input_dir <- 'path/to/gzipped/radolan/grids'
+
+# Define spatial extent through a polygon mask from the study area
+aoi_file <- unzip('path/to/Example_AOIFile.kmz', exdir = tempdir())
+
+# Define output path and filename
+output_dir <- 'path/to/extracted/precipitation/data'
+
+#################################################################################
+# Polygon preparation
+poly_aoi <- st_read(aoi_file) 
+# convert to projection of RADOLAN data
+poly_aoi <- st_transform(poly_aoi, 
+  crs = "+proj=stere +lat_0=90 +lat_ts=60 +lon_0=10 +a=6370040 +b=6370040 +x_0=0 +y_0=0 +units=km +no_defs")
+# omit z dimension to avoid further complications in extract()
+poly_aoi <- st_zm(poly_aoi, what = "ZM") 
+# convert to terra object
+poly_aoi <- vect(poly_aoi) 
+
+################################################################################
+# Extract data for predefined study area
+for(year in start_year : end_year){ 
+  
+  # select only files representing the hourly sums (ending at minute 50, hh:50)
+  selected_files <- list.files(file.path(input_dir, year),
+                               pattern = "raa01-rw_10000-\\d{8}50.*\\.gz$", full.names = TRUE)
+
+  # progress bar
+  print(paste("Extracting ", year))
+  pb <- txtProgressBar(min = 0, max = length(selected_files), style = 3)
+  i = 1
+  
+  ## for every year: iterate over selected hh:50 files 
+  for(file in selected_files){
+
+  # read raster file  
+  radolan_data <- readDWD(paste(input_dir, year, file,sep="/"), toraster = T, type="radar", tz = "GMT")  # unzip and read RADOLAN data
+
+  #remove unpacked data file to reduce storage space and to avoid any confusion with double file names
+  remove_file <- substr(file, 1, nchar(file) - 3)
+  unlink(paste(input_dir,"/", year, "/", remove_file, sep=""))
+  
+  # Raster file editing
+  # timestamp extraction 
+  timestamp <- radolan_data$meta$date
+  
+  # Assign RADOLAN projection and extent (binary files contain no georeference).
+  # targetproj = NULL: the raster is not reprojected, to avoid resampling the values.
+  radolan_r <- projectRasterDWD(radolan_data$dat, targetproj = NULL)
+  
+  # Area-weighted mean precipitation of the study area
+  # (polygon has been transformed to the RADOLAN CRS beforehand; 
+  # exact = TRUE also covers areas smaller than one cell or spanning cell borders)
+  extracted_means <- terra::extract(radolan_r, aoi_v, fun = mean, na.rm = TRUE, exact = TRUE)
+
+  # Save precipitation results in data.frame
+  # average precipitation across all grid cells within the study area
+  # multiply precipitation with 10 for unit conversion from 1/10mm to mm
+  if(file == selected_files[1]){
+    radolan.df <- data.frame(timestamp=timestamp, precip=round(as.numeric(global(extracted_means,fun="mean",na.rm=T))*10,2))}
+  else{radolan.df <- rbind(radolan.df, data.frame(timestamp=timestamp, precip=round(as.numeric(global(extracted_means, fun="mean", na.rm=T))*10,2)))}
+  
+  #progress bar
+  setTxtProgressBar(pb, i)
+  i <- i+1
+  
+  }  # end of loop for(file in selected_files){
+    
+
+close(pb)
+
+#save data
+write.csv(radolan.df, paste(output_dir, "/RADOLAN_HourlyPrecipitation_", year, ".csv", sep = ""), row.names = F)
+
+} # end of loop for(year in start_year : end_year){
