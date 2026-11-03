@@ -100,7 +100,7 @@ for(year in start_year : end_year){
   # Area-weighted mean precipitation of the study area
   # (polygon has been transformed to the RADOLAN CRS beforehand; 
   # exact = TRUE also covers areas smaller than one cell or spanning cell borders)
-  extracted_means <- terra::extract(radolan_r, aoi_v, fun = mean, na.rm = TRUE, exact = TRUE)
+  extracted_means <- terra::extract(radolan_r, poly_aoi, fun = mean, na.rm = TRUE, exact = TRUE)
 
   # Save precipitation results in data.frame
   # average precipitation across all grid cells within the study area
