@@ -1,28 +1,25 @@
 # dwd-grids-to-timeseries
 Download DWD grids and extract time series of meteo data
 
-This repository provides a documented, ready-to-use R workflow for obtaining hourly time series of meteorological variables from the DWD grid products RADOLAN and HOSTRADA - from downloading the gridded products to the extraction of a consistent (long-term) time series for a user-defined study area. It builds on the R package rdwd and expands the functionalities of rdwd by:
- - **Consistent file management:** RADOLAN archive formats change over time. Depending on the period, historical data come as .tar.gz or .tar monthly archives, and in        2023 as nested archives (monthly archives containing daily archives). The RADOLAN untar script converts all downloaded files into a uniform format for straight-           forwanrd post-procession.
- - **Consistent hourly precipitation sums:** Since 2023 RADOLAN data are provided in hourly sums updated every 10 minutes, i.e. up to six overlapping files per hour. The     scripts only use the hourly sums ending at minute 50 (hh:50), consistent with the aggregation to the full hour as in the data before 2023.
-  - **Area of Interest masking:** the study area polygon is transformed to the respective DWD product's projection (XY for RADOLAN and (ETRS89-extended / LCC Europe, EPSG:3034 for HOSTRADA) to extract taylored information for the area of interest. The extraction also covers smaller AOIs < 1 km size. 
+This repository provides a documented, ready-to-use R workflow for obtaining hourly time series of meteorological variables from the DWD grid products RADOLAN and HOSTRADA - from downloading the gridded products to the extraction of a consistent (long-term) time series for a user-defined study area and its storage in a .csv file. It builds on the R package [`rdwd`](https://github.com/brry/rdwd) and complements it with:
 
+* **Consistent file handling:** RADOLAN archive formats change over time. Depending on the period, historical data come as `.tar.gz` or `.tar` monthly archives, and in 2023 as nested archives (monthly archives containing daily archives). The RADOLAN unpacking script converts all downloaded files into individually gzipped hourly files, a uniform format for straightforward further processing.
+* **Consistent hourly precipitation sums:** Since 2023, RADOLAN provides a hourly sum updated every 10 minutes, i.e. up to six overlapping files per hour. The radiaion sums are only extracted from the hourly sums ending at minute 50 (hh:50), consistent with the aggregation to the full hour as in the data before 2023.
+* **Area of Interest (AOI masking):** the study area polygon is transformed to the respective DWD product's projection (polar stereographic (central meridian 10.0° E, standard parallel 60.0° N for RADOLAN and ETRS89-extended / LCC Europe, EPSG:3034 for HOSTRADA) to extract taylored information for the area of interest. The extraction also covers smaller AOIs < 1 km size.
+  
+## Covered Products
+| Product | Variables | Resolution | Format | Details |
+|---|---|---|---|---|
+| **HOSTRADA** | Air temperature, global radiation | 1 km, hourly | NetCDF | [hostrada/README.md](hostrada/README.md) |
+| **RADOLAN RW** | Precipitation (radar-based, gauge-adjusted) | 1 km, hourly | Binary (gzipped) | [radolan/README.md](radolan/README.md) |
 
-Two DWD products are covered:
-| Script | Variable |
-|---|---|
-| `ExtractHOSTRADA_HighFrequencyAirTemperature_Huetelmoor.R` | Air temperature |
-| `ExtractHOSTRADA_HighFrequencyRadiation_Huetelmoor.R` | Global radiation |
-Product	Variables	Resolution	Format	Details
-HOSTRADA	Air temperature, global radiation	1 km, hourly	NetCDF	hostrada/README.md
-RADOLAN RW	Precipitation (radar-based, gauge-adjusted)	1 km, hourly	Binary	radolan/README.md
-
-Workflow
-HOSTRADA
-| Download the monthly NetCDF files for a user-defined period. |`DownloadHOSTRADA_HighFrequencyAirTemperature.R':
-| Extract the hourly time series for the study area. | `ExtractHOSTRADA_HighFrequencyAirTemperature.R'
-RADOLAN
-Download the hourly files – from the `historical` folder (monthly archives) and/or the `recent` folder (individual files) on the DWD server.
-Unpack the historical archives into individually gzipped hourly files (`.gz`), matching the format of the recent data. This step is not needed for recent data.
+## Workflow
+### HOSTRADA
+- Download the monthly NetCDF files for a user-defined period. (`HOSTRADA/DownloadHOSTRADA_HighFrequencyAirTemperature.R')
+- Extract the hourly time series for the study area. (`HOSTRADA/ExtractHOSTRADA_HighFrequencyAirTemperature.R')
+### RADOLAN
+- Download the hourly files – from the `historical` folder (monthly archives) and/or the `recent` folder (individual files) from the DWD server (`RADOLAN/DownloadRADOLAN_HighFrequencyPrecipitation_Historical.R' and/or `RADOLAN/DownloadRADOLAN_HighFrequencyPrecipitation_Recent.R)
+- Unpack the historical archives into individually gzipped hourly files (`.gz`), matching the format of the recent data (UntarHistoricalRADOLAN_HighFrequencyPrecipitation'. This step is not needed for recent data.
 Extract the hourly time series for the study area.
 For each product, the extraction step computes the area-weighted mean over all grid cells overlapping the study area polygon. This also works for areas smaller than one grid cell or spanning cell borders. Results are written as one CSV file per year, with timestamps in UTC.
 
