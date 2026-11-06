@@ -15,20 +15,21 @@ This repository provides a documented, ready-to-use R workflow for obtaining hou
 
 ## Workflow
 ### HOSTRADA
-- Download the monthly NetCDF files for a user-defined period. (`HOSTRADA/DownloadHOSTRADA_HighFrequencyAirTemperature.R')
-- Extract the hourly time series for the study area. (`HOSTRADA/ExtractHOSTRADA_HighFrequencyAirTemperature.R')
+1. **Download** the monthly NetCDF files for a user-defined period
+   (`hostrada/DownloadHOSTRADA_HighFrequencyAirTemperature.R`, `hostrada/DownloadHOSTRADA_HighFrequencyRadiation.R`).
+2. **Extract** the hourly time series for the study area
+   (`hostrada/ExtractHOSTRADA_HighFrequencyAirTemperature.R`, `hostrada/ExtractHOSTRADA_HighFrequencyRadiation.R`).
 ### RADOLAN
-- Download the hourly files – from the `historical` folder (monthly archives) and/or the `recent` folder (individual files) from the DWD server (`RADOLAN/DownloadRADOLAN_HighFrequencyPrecipitation_Historical.R' and/or `RADOLAN/DownloadRADOLAN_HighFrequencyPrecipitation_Recent.R)
-- Unpack the historical archives into individually gzipped hourly files (`.gz`), matching the format of the recent data (UntarHistoricalRADOLAN_HighFrequencyPrecipitation'. This step is not needed for recent data.
-Extract the hourly time series for the study area.
-For each product, the extraction step computes the area-weighted mean over all grid cells overlapping the study area polygon. This also works for areas smaller than one grid cell or spanning cell borders. Results are written as one CSV file per year, with timestamps in UTC.
+1. **Download** the hourly files from the DWD server – from the `historical` folder (monthly archives) and/or the `recent` folder (individual files)
+   (`radolan/DownloadRADOLAN_HighFrequencyPrecipitation_Historical.R`, `radolan/DownloadRADOLAN_HighFrequencyPrecipitation_Recent.R`).
+2. **Unpack** the historical archives into individually gzipped hourly files (`.gz`), matching the format of the recent data
+   (`radolan/UnpackRADOLAN_HighFrequencyPrecipitation.R`). This step is not needed for recent data.
+3. **Extract** the hourly time series for the study area
+   (`radolan/ExtractRADOLAN_HighFrequencyPrecipitation.R`).
 
-An example polygon of the area of interest (AOI) is provided in `example/example_aoi_huetelmoor.kmz` for testing. To use your own study area, create a polygon, e.g. in Google Earth, and save it as `.kmz` or `.kml`. The file must contain exactly one polygon.
+For each product, the extraction step computes the area-weighted mean over all grid cells overlapping the AOI polygon. An example polygon of the AOI is provided in `example_aoi.kmz` for testing. To use your own study area, create a polygon, e.g. in Google Earth, and save it as `.kmz`. 
+
 The scripts have been tested for the years 2009–2026 (HOSTRADA) and 2009–2024 (RADOLAN historical data) plus the recent RADOLAN data.
-
-Known pitfalls
-These are the issues the workflow takes care of – and the main reasons why it goes beyond a plain `rdwd` call:
-- RADOLAN archive formats change over time. Depending on the period, historical data come as `.tar.gz` or `.tar` monthly archives, and in 2023 as nested archives (monthly archives containing daily archives). In practice, `rdwd::readDWD()` could only read individually gzipped hourly files reliably, so all periods are converted into this uniform format.
 
 All data: Deutscher Wetterdienst (DWD), Climate Data Center (CDC), opendata.dwd.de. The data are provided under the Creative Commons BY 4.0 license. Please cite the datasets as described in the product READMEs.
 
