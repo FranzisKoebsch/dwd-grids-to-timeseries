@@ -1,7 +1,11 @@
 # dwd-grids-to-timeseries
 Download DWD grids and extract time series of meteo data
 
-This repository provides a documented, ready-to-use R workflow for obtaining hourly time series of meteorological variables from the DWD grid products RADOLAN and HOSTRADA - from downloading the gridded products to the extraction of a consistent (long-term) time series for a user-defined study area. It builds on the R package rdwd and adresses several pitfalls in handling these data (see known pitfalls). 
+This repository provides a documented, ready-to-use R workflow for obtaining hourly time series of meteorological variables from the DWD grid products RADOLAN and HOSTRADA - from downloading the gridded products to the extraction of a consistent (long-term) time series for a user-defined study area. It builds on the R package rdwd and expands the functionalities of rdwd by:
+ - **Consistent file management:** RADOLAN archive formats change over time. Depending on the period, historical data come as .tar.gz or .tar monthly archives, and in        2023 as nested archives (monthly archives containing daily archives). The RADOLAN untar script converts all downloaded files into a uniform format for straight-           forwanrd post-procession.
+ - **Consistent hourly precipitation sums:** Since 2023 RADOLAN data are provided in hourly sums updated every 10 minutes, i.e. up to six overlapping files per hour. The     scripts only use the hourly sums ending at minute 50 (hh:50), consistent with the aggregation to the full hour as in the data before 2023.
+  - **Area of Interest masking:** the study area polygon is transformed to the respective DWD product's projection (XY for RADOLAN and (ETRS89-extended / LCC Europe, EPSG:3034 for HOSTRADA) to extract taylored information for the area of interest. The extraction also covers smaller AOIs < 1 km size. 
+
 
 Two DWD products are covered:
 Product	Variables	Resolution	Format	Details
