@@ -8,14 +8,18 @@ This repository provides a documented, ready-to-use R workflow for obtaining hou
 
 
 Two DWD products are covered:
+| Script | Variable |
+|---|---|
+| `ExtractHOSTRADA_HighFrequencyAirTemperature_Huetelmoor.R` | Air temperature |
+| `ExtractHOSTRADA_HighFrequencyRadiation_Huetelmoor.R` | Global radiation |
 Product	Variables	Resolution	Format	Details
 HOSTRADA	Air temperature, global radiation	1 km, hourly	NetCDF	hostrada/README.md
 RADOLAN RW	Precipitation (radar-based, gauge-adjusted)	1 km, hourly	Binary	radolan/README.md
 
 Workflow
 HOSTRADA
-Download the monthly NetCDF files for a user-defined period.
-Extract the hourly time series for the study area.
+| Download the monthly NetCDF files for a user-defined period. |`DownloadHOSTRADA_HighFrequencyAirTemperature.R':
+| Extract the hourly time series for the study area. | `ExtractHOSTRADA_HighFrequencyAirTemperature.R'
 RADOLAN
 Download the hourly files – from the `historical` folder (monthly archives) and/or the `recent` folder (individual files) on the DWD server.
 Unpack the historical archives into individually gzipped hourly files (`.gz`), matching the format of the recent data. This step is not needed for recent data.
