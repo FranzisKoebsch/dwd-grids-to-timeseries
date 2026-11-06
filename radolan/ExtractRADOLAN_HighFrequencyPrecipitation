@@ -7,7 +7,7 @@
 # Source: https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin/
 # Historical data products: hourly files, partly tarred and partly gzipped, downloaded with the script 'DownloadRadolan_HighFrequencyPrecipitation_HistoricalData.R`
 # Source: https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/historical/bin/
-# Heterogeneous format of historical data is harmonized with the script UntarRADOLAN_HighFrequencyPrecipitation.R to consistent unpacked gzipped files
+# Heterogeneous format of historical data is harmonized with the script UnpackRADOLAN_HighFrequencyPrecipitation.R to consistent unpacked gzipped files
 # Product description: https://www.dwd.de/DE/leistungen/radolan/produktuebersicht/radolan_produktuebersicht_pdf.pdf?__blob=publicationFile&v=12
 
 ## 2. Data Characteristics
@@ -22,7 +22,7 @@
 ## 3. Processing:
 # This script extracts hourly precipitation time series for defined study areas from downloaded RADOLAN RW grids.
 # Input files are expected in one subfolder per year, named by the year, (e.g. input_dir/2009/, input_dir/2010/, ...), 
-# as created by the download/untar script.
+# as created by the download/unpack script.
 # Input files are zipped in .gz format, readDWD() unpacks and stores the unzipped files in the same folder.
 # The unzipped files are removed right after creation
 # to avoid any confusion with file names and to save storage space.
