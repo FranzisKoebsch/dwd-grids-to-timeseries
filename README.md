@@ -16,7 +16,7 @@ This repository provides a documented, ready-to-use R workflow for obtaining hou
 ## Workflow
 ### HOSTRADA
 1. **Download** the monthly NetCDF files for a user-defined period
-   (`hostrada/DownloadHOSTRADA_HighFrequencyAirTemperature.R`, `hostrada/DownloadHOSTRADA_HighFrequencyRadiation.R`).
+   ([DownloadHOSTRADA_HighFrequencyAirTemperature.R](DownloadHOSTRADA_HighFrequencyAirTemperature.R)), `hostrada/DownloadHOSTRADA_HighFrequencyRadiation.R`).
 2. **Extract** the hourly time series for the study area
    (`hostrada/ExtractHOSTRADA_HighFrequencyAirTemperature.R`, `hostrada/ExtractHOSTRADA_HighFrequencyRadiation.R`).
 ### RADOLAN
@@ -27,9 +27,9 @@ This repository provides a documented, ready-to-use R workflow for obtaining hou
 3. **Extract** the hourly time series for the study area
    (`radolan/ExtractRADOLAN_HighFrequencyPrecipitation.R`).
 
-For each product, the extraction step computes the area-weighted mean over all grid cells overlapping the AOI polygon. An example polygon of the AOI is provided in `example_aoi.kmz` for testing. To use your own study area, create a polygon, e.g. in Google Earth, and save it as `.kmz`. 
+For each product, the extraction step computes the area-weighted mean over all grid cells overlapping the AOI polygon. An example polygon of the AOI is provided in `Example_AOIFile.kmz` for testing. To use your own study area, create a polygon, e.g. in Google Earth, and save it as `.kmz`. 
 
-The scripts have been tested for the years 2009–2026 (HOSTRADA) and 2009–2024 (RADOLAN historical data) plus the recent RADOLAN data.
+The scripts have been tested for the years 2009–2026.
 
 All data: Deutscher Wetterdienst (DWD), Climate Data Center (CDC), opendata.dwd.de. The data are provided under the Creative Commons BY 4.0 license. Please cite the datasets as described in the product READMEs.
 
