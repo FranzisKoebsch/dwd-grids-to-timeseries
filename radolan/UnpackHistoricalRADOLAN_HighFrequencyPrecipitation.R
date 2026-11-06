@@ -1,5 +1,5 @@
 #################################################################################
-# Unpacking of historical RADOLAN RW Archives into Individually gzipped Hourly Files (.gz)
+# Unpacking of Historical RADOLAN RW Archives into Individually gzipped Hourly Files (.gz)
 # This step is required between download and time series extraction
 # to provide consistent input data for all years (historical and recent data product).
 # Not required for recent RADOLAN RW Archives
@@ -18,14 +18,14 @@
 
 ## 3. Archive structure on the DWD server and processing (2009-2024)
 # 06/2009 - 06/2014: .tar.gz monthly archives containing gzipped hourly files
-#                    -> script untars, unpacked files are kept as .gz
+#                    -> script unpacks and keeps unpacked files as .gz
 # 07/2014 - 2022:    .tar monthly archives containing uncompressed hourly files
-#                    -> script untars and compresses  unpacked files to .gz (also saves storage space)
+#                    -> script unpacks and compresses  unpacked files to .gz (also saves storage space)
 # 2023-2024:          nested archives (monthly .tar archives containing daily .tar.gz archives)
-#                    -> script untars twice, unpacked files are kept as .gz
+#                    -> script unpacks twice and keeps unpacked files as .gz
 
 ## 4. Note
-# The original tar archives are not deleted by this script. Remove them manually
+# The original archives are not deleted by this script. Remove them manually
 # after checking that all hourly files have been extracted.
 #################################################################################
 
@@ -38,12 +38,12 @@ library("R.utils")
 # Directory to read tar.gz RADOLAN data 
 input_dir <- 'Path/To/Downloaded/Historical/Radolan/Data'
 
-# Directory to store untarred gz files 
-output_dir <- 'Path/To/Store/Untarred/RADOLAN/Output'
+# Directory to store unpacked gz files 
+output_dir <- 'Path/To/Store/Unpacked/RADOLAN/Output'
 
 #################################################################################
 # Start Data extraction
-# Iterate over yearly subfolder in the untarred folder 
+# Iterate over yearly subfolder in the tarred folder 
 for(year in list.files(input_dir)){ 
 
   ## iterate over folders stored in each subdirectory
@@ -57,7 +57,7 @@ for(year in list.files(input_dir)){
     if(folder==list.files(paste(input_dir, year, sep="/"))[[1]]){
       dir.create(full_output_dir)}
     
-    # untar
+    # unpack
     untar(full_input_dir, exdir = full_output_dir)
     
     #check if folders are still tarred (due to nested tar-structures in the original data keeping)
