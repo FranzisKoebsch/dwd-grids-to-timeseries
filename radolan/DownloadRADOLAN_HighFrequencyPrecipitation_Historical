@@ -21,7 +21,7 @@
 # The script downloads the RW files as monthly .tar.gz archives for a user-defined period (start and end year).
 # Historical RADOLAN data are bundled in monthly archives
 # (.tar or .tar.gz, partly nested), which must be unpacked in a separate step.
-# Downloaded RADOLAN data are therefore stored in the subfolder 'unpacked'
+# Downloaded RADOLAN data are therefore stored in the subfolder 'tarred'
 # and will be unpacked by UnpackRADOLAN_HighFrequencyPrecipitation.R.
 #################################################################################
 # Packages required
@@ -46,9 +46,9 @@ index <- indexFTP(link, base = base)
 for (year in c(start_year: end_year)){
 
   # Create directory to save the downloaded RADOLAN data in annual folders.
-  # Downloaded RADOLAN data are stored in the subfolder 'unpacked'
+  # Downloaded RADOLAN data are stored in the subfolder 'tarred'
   # and will be unpacked by UnpackRADOLAN_HighFrequencyPrecipitation.R.
-  output_dir_annual <- paste(output_dir, "unpacked", year, sep="/")
+  output_dir_annual <- paste(output_dir, "tarred", year, sep="/")
   if(!dir.exists(output_dir_annual)){
     dir.create(output_dir_annual, recursive = T)} # create directories for annual data packages
   
