@@ -1,1 +1,78 @@
+# RADOLAN – Hourly Precipitation Time Series from DWD Radar Grids
+
+R scripts to download hourly radar-based precipitation grids (RADOLAN RW) from the German Weather Service (DWD), unpack them into a uniform format and extract spatially averaged time series for an user-defined study area.
+
+## About the dataset
+
+RADOLAN (Radar-Online-Aneichung) combines precipitation measurements from the DWD weather radar network with hourly observations from rain gauge stations.
+
+From the RADOLAN product series, these scripts use the **RW product**: hourly precipitation sums adjusted to station observations. Products with higher temporal resolution (5 and 10 min) exist, but are only quasi-calibrated and therefore of lower quality.
+
+| Property | Value |
+|---|---|
+| Spatial coverage | Germany |
+| Temporal coverage | 06/2005 – present |
+| Temporal resolution | 1 hour (hourly sums); since 01/2023, a hourly sums are provided every 10 minutes |
+| Time reference | End of the hourly accumulation interval (UTC); standard timestamp hh:50 |
+| Spatial resolution | 1 km × 1 km (900 × 900 grid cells) |
+| Projection | Polar stereographic (central meridian 10.0° E, standard parallel 60.0° N, spherical Earth with radius 6370.04 km); no EPSG code |
+| Georeference | **None in the files** – projection and extent must be assigned after reading (see below) |
+| Format | Binary RADOLAN composite format; `recent`: individually gzipped hourly files, `historical`: monthly archives (see below) |
+| Updates | Continuously; data of past years are moved from `recent` to `historical` |
+| Scaling | Raw values are hourly sums in 1/10 mm → converted to mm |
+
+## Scripts
+
+### 1. Download
+The scripts download the RADOLAN national grids for a user-defined period.
+
+| Script | Data | DWD source |
+|---|---|---|
+| `DownloadRADOLAN_HighFrequencyPrecipitation_Historical.R` | Historical data (monthly archives) | [hourly/radolan/historical/bin](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/historical/bin/) |
+| `DownloadRADOLAN_HighFrequencyPrecipitation_Recent.R` | Recent data (individual hourly files) | [hourly/radolan/recent/bin](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin/) |
+
+### 2. Unpacking of historical archives
+
+| Script | Purpose |
+|---|---|
+| `UnpackRADOLAN_HighFrequencyPrecipitation.R` | Converts the historical archives into individually gzipped hourly files (`.gz`), matching the format of the recent data |
+
+The archive structure on the DWD server has changed several times:
+
+| Period | Archive format on the server | Processing |
+|---|---|---|
+| 06/2009 – 06/2014 | `.tar.gz` monthly archives containing gzipped hourly files | Unpacked, files are kept as `.gz` |
+| 07/2014 – 2022 | `.tar` monthly archives containing uncompressed hourly files | Unpacked, files are gzipped |
+| 2023 | Nested archives (monthly archives containing daily `.tar.gz` archives) | Unpacked twice, files are gzipped |
+| 2024 | Individually gzipped hourly files | No processing needed |
+
+**Why this step is needed:** `rdwd::readDWD()` is intended to handle `.tar.gz` archives directly. In practice, however, only individually gzipped hourly files could be read reliably. Converting all files into this format provides consistent input for the time series extraction. This step is not needed for recent data.
+
+### 3. Time series extraction
+Extracts an hourly time series of precipiation sums for a specified AOI and a specified start and end date.
+
+| Script | Variable |
+|---|---|
+| `ExtractRADOLAN_HighFrequencyPrecipitation.R` | Precipitation |
+
+**Input**
+- Individually gzipped hourly RW files (`.gz`), organized in annual folders
+- A `.kmz` or `.kml` file with exactly one study area polygon, e.g. created in Google Earth. An example AOI polygon file (Example_AOIFile.kmz) is provided for testing. The polygon covers part of the Hütelmoor peatland (NE Germany).
+
+**Output**
+Hourly precipitation sums (mm), spatially averaged over the study area polygon, one CSV file per year.
+
+## Notes
+
+The scripts have been tested for the historical data 2009–2026.
+
+## Data source and license
+
+Data: Deutscher Wetterdienst (DWD), Climate Data Center (CDC), [opendata.dwd.de](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/).
+The data are provided under the [Creative Commons BY 4.0 license](https://www.dwd.de/copyright).
+
+Further information:
+- [RADOLAN at the DWD](https://www.dwd.de/RADOLAN)
+- [Dataset description (recent, binary)](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin/DESCRIPTION_gridsgermany-hourly-radolan-recent-bin_en.pdf)
+- [RADOLAN/RADVOR composite format description](https://opendata.dwd.de/climate_environment/CDC/help/RADOLAN/Unterstuetzungsdokumente/RADOLAN-RADVOR-Kompositformat_2.6.pdf)
 
