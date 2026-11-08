@@ -17,7 +17,7 @@ HOSTRADA (High-resolution grids of hourly variables for Germany) is provided by 
 | Format | NetCDF |
 | Updates | Monthly; a new file for the previous month is added at the end of each month (time lag ≈ 1 month) |
 | Scaling | None |
-**Note on effective resolution:** Although all grids are provided at 1 km, the effective resolution depends on station density and predictor resolution. Cloud cover and radiation have an effective resolution of roughly 25 km; wind speed and direction about 3 km.
+ **Note on effective resolution:** Although all grids are provided at 1 km, the effective resolution depends on station density and predictor resolution. Cloud cover and radiation have an effective resolution of roughly 25 km; wind speed and direction about 3 km.
  
 ### Variables
  
@@ -42,18 +42,18 @@ Available scripts currently cover **air temperature** and **global radiation**.
 | `DownloadHOSTRADA_HighFrequencyAirTemperature.R` | Air temperature | [air_temperature_mean](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/hostrada/air_temperature_mean/) |
 | `DownloadHOSTRADA_HighFrequencyRadiation.R` | Global radiation | [radiation_downwelling](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/hostrada/radiation_downwelling/) |
  
-The scripts download the monthly NetCDF files for a user-defined period (start and endy year), and have been tested for the years 2009-2026. Downloaded files follow the DWD naming scheme, e.g. `tas_1hr_HOSTRADA-v1-0_BE_gn_1995010100-1995013123.nc`. 
+The scripts download the monthly NetCDF files for a user-defined period (start and end year), and have been tested for the years 2009-2026. Downloaded files follow the DWD naming scheme, e.g. `tas_1hr_HOSTRADA-v1-0_BE_gn_1995010100-1995013123.nc`. 
  
 ### 2. Time series extraction
  
 | Script | Variable |
 |---|---|
-| `ExtractHOSTRADA_HighFrequencyAirTemperature_Huetelmoor.R` | Air temperature |
-| `ExtractHOSTRADA_HighFrequencyRadiation_Huetelmoor.R` | Global radiation |
+| `ExtractHOSTRADA_HighFrequencyAirTemperature.R` | Air temperature |
+| `ExtractHOSTRADA_HighFrequencyRadiation.R` | Global radiation |
  
 **Input**
  - Downloaded NetCDF files for the respective variable, organized in annual folders
-- A `.kmz` file with the study area polygon(s), e.g. created in Google Earth. An example AOI polygon file (Example_AOIFile.kmz) is provided for testing. The polygon covers part of the Hütelmoor peatland (NE Germany).
+- A `.kmz` file with the study area polygon, e.g. created in Google Earth. An example AOI polygon file (Example_AOIFile.kmz) is provided for testing. The polygon covers part of the Hütelmoor peatland (NE Germany).
   
 **Output**
  Hourly time series of the meteorological variable, spatially averaged per study area polygon (timestamps in UTC).
