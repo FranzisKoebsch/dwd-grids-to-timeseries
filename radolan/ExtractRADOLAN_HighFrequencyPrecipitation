@@ -110,10 +110,9 @@ for(year in start_year : end_year){
     
     # Save precipitation results in data.frame
     # average precipitation across all grid cells within the study area
-    # multiply precipitation with 10 for unit conversion from 1/10mm to mm
     if(file == selected_files[1]){
-      radolan.df <- data.frame(timestamp=timestamp, precip=round(extracted_means[1, 2]*10,2))}
-    else{radolan.df <- rbind(radolan.df, data.frame(timestamp=timestamp, precip=round(extracted_means[1, 2]*10,2)))}
+      radolan.df <- data.frame(timestamp=timestamp, precip=round(extracted_means[1, 2],2))}
+    else{radolan.df <- rbind(radolan.df, data.frame(timestamp=timestamp, precip=round(extracted_means[1, 2],2)))}
     
     #progress bar
     setTxtProgressBar(pb, i)
