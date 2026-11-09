@@ -46,8 +46,6 @@ The archive structure on the DWD server has changed several times:
 | 2023 | Nested archives (monthly archives containing daily `.tar.gz` archives) | Unpacked twice, files are gzipped |
 | 2024 | Individually gzipped hourly files | No processing needed |
 
-**Why this step is needed:** `rdwd::readDWD()` is intended to handle `.tar.gz` archives directly. In practice, however, only individually gzipped hourly files could be read reliably. Converting all files into this format provides consistent input for the time series extraction. This step is not needed for recent data.
-
 ### 3. Time series extraction
 Extracts an hourly time series of precipiation sums for a specified AOI and a specified start and end date.
 
